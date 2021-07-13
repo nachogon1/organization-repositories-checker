@@ -1,0 +1,2 @@
+echo GITHUB_TOKEN="WRITE_YOUR_TOKEN_HERE" >> develop.env
+echo GITHUB_TOKEN="WRITE_ORGANIZATION_NAME_HERE" >> develop.env
