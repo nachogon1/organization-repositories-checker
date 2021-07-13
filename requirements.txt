@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+aiohttp
+asyncio
+pyyaml
+loguru
+black
+starlette
+pymongo
