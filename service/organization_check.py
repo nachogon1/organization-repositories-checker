@@ -6,10 +6,8 @@ from fastapi import APIRouter, Query, Depends
 organization_check = APIRouter()
 
 
-@organization_check.get("")
-async def check_organization_steps(organization_name: str = Query(default=GITHUB_ORGANIZATION), github_token: str = Query(default=GITHUB_TOKEN), step_crud: StepCRUD = Depends()):
-    print("token", github_token)
+@organization_check.get("/organization-check")
+async def check_organization_steps(organization_name: str = Query(default=GITHUB_ORGANIZATION, alias="organization-name"), github_token: str = Query(default=GITHUB_TOKEN, alias="github-token"), step_crud: StepCRUD = Depends()):
     steps = step_crud.get_all()
-    print("STEEEPS", steps)
     return await check_steps(organization_name, github_token, steps)
 
