@@ -9,3 +9,4 @@ starlette
 pymongo
 aioschedule
 requests
+pytest
