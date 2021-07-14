@@ -11,3 +11,4 @@ aioschedule
 requests
 pytest
 pytest-httpserver
+isort
