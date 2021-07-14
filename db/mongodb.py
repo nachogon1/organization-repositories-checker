@@ -1,6 +1,6 @@
 import pymongo
 
-from core.configs import DB_NAME, MONGO_URL
+from configs import DB_NAME, MONGO_URL
 
 
 def get_database():
