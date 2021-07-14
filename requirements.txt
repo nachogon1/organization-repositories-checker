@@ -8,3 +8,4 @@ black
 starlette
 pymongo
 aioschedule
+requests

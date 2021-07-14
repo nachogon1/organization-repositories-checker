@@ -1,6 +1,6 @@
 from configs import GITHUB_TOKEN, GITHUB_ORGANIZATION
 from db.steps import StepCRUD
-from scheduler import check_steps
+from scheduler.tools import check_steps
 from fastapi import APIRouter, Query, Depends
 
 organization_check = APIRouter()

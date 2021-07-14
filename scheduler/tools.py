@@ -96,5 +96,6 @@ async def check_steps(organization_name, token, steps=[]):
                     )
                 else:
                     github.checkup_dict[text["name"]] = "Has no steps."
+        print("Repository missing steps", github.checkup_dict)
         return github.checkup_dict
 

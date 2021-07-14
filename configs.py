@@ -2,7 +2,6 @@ import os
 import sys
 import logging
 
-from loguru import logger
 from starlette.config import Config
 
 
@@ -16,3 +15,6 @@ MONGO_URL: str = config("MONGO_URL", default=f"mongodb://{MONGO_HOST}:{MONGO_POR
 DB_NAME: str = config("DB_NAME", default="yara_db")
 GITHUB_ORGANIZATION: str = config("GITHUB_ORGANIZATION", default="")
 GITHUB_TOKEN: str = config("GITHUB_TOKEN", default="")
+APP_HOST: str = config("APP_HOST", default="0.0.0.0")
+APP_PORT: str = config("APP_PORT", default="8000")
+APP_URL: str = config("APP_URL", default=f"http://{APP_HOST}:{APP_PORT}")
