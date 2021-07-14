@@ -23,13 +23,14 @@ def create_report(checkup_dict):
 
 def check_job_steps(job_steps_dict, list_required_steps):
     """Check the steps from a job and return the missing ones."""
+    print(list_required_steps)
     if job_steps_dict:
         check_up_dict = dict([(job, []) for job in job_steps_dict])
         for job in job_steps_dict:
             for step in list_required_steps:
                 if step not in job_steps_dict[job]:
                     check_up_dict[job] += [step]
-    return job_steps_dict
+    return check_up_dict
 
 
 def get_job_steps_dict(yml_file):
@@ -37,7 +38,8 @@ def get_job_steps_dict(yml_file):
     job_steps_dict = {}
     if "jobs" in yml_file:
         for job in yml_file["jobs"]:
-            job_steps_dict[job] = job["steps"]
+            print(job_steps_dict, job)
+            job_steps_dict[job] = yml_file["jobs"][job]["steps"]
         return job_steps_dict
 
 
@@ -59,7 +61,7 @@ def parse_yml(yml):
 
 
 # TODO substitute env variables
-async def check_steps(organization_name, token):
+async def check_steps(organization_name, token, steps=[]):
     github = Github(
         organization_name, token=token
     )
@@ -85,13 +87,14 @@ async def check_steps(organization_name, token):
                 config_yml = await resp.text()
                 print(yaml.safe_load(config_yml))
                 yml_parsed = parse_yml(config_yml)
+                steps_parsed = [parse_yml(step.command) for step in steps]
                 job_steps_dict = get_job_steps_dict(yml_parsed)
                 if job_steps_dict:
-                    print(check_job_steps(job_steps_dict, []))  # TODO add steps
+                    print(check_job_steps(job_steps_dict, steps))  # TODO add steps
                     github.checkup_dict[text["name"]] = check_job_steps(
-                        job_steps_dict, []
+                        job_steps_dict, steps_parsed
                     )
                 else:
-                    github.checkup_dict[text["name"]] = None
+                    github.checkup_dict[text["name"]] = "Has no steps."
         return github.checkup_dict
 
