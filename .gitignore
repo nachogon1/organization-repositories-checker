@@ -2,3 +2,4 @@ develop.env
 log.txt
 *.xml
 .idea
+*.pyc
