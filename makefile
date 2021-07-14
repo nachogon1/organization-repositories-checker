@@ -4,7 +4,6 @@ help:
 
 build:
 	docker-compose up -d
-	bash develop.sh
 
 test:
-	docker exec -it yara_challnge_web_1 pytest
+	docker exec -it organization-repositories-checker_web_1 pytest
