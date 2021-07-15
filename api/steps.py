@@ -18,6 +18,9 @@ def get_step(step_id: str, step_crud: StepCRUD = Depends()):
 
 @steps_router.post("")
 def create_step(step: StepModel, step_crud: StepCRUD = Depends()):
+    """
+    Create a step. Write over "string" your step.
+    """
     return step_crud.insert(step).dict(by_alias=True)
 
 

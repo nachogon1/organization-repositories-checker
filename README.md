@@ -15,11 +15,12 @@ After cloning the repository. From the root folder, you can run either.
 Installing is necessary for testing and usage.
 
 ## Testing
-Run `make test`.
+Run `make test`. Or run `docker exec -it organization-repositories-checker_web_1 pytest`.
 
 ## Usage
 To start using the Step API or organizations checker API, look at the API Documentation. <b>
-Prior to start using the organization checker you need to add a `develop.env` file with your Github credentials.
+Prior to starting using the organization checker you need to add a `develop.env` file with your Github credentials 
+(at the root folder of this project ).
 For example:<br>
 ```
 GITHUB_TOKEN="<WRITE_YOUR_TOKEN_HERE>"
@@ -30,7 +31,7 @@ the developer is free to use their own way of securely generate their own .env f
 at the different stages. For that purpose, the developer must change the .env file
 indicated in `configs.py` at root level. <br>
 Once the project is configured, then run `make schedule` for activating the organization
-repository checker scheduler. Currently it is set to run every day at 9:00. To change this setup
+repository checker scheduler. Currently it is set to run every day at 9:00 AM. To change this setup
 it is necessary to go to `scheduler/scripts.py`  and know about python `aioschedule`.<br>
 To run the organization checker from the API, please go to the API Documentation.
 
@@ -66,12 +67,12 @@ First level:<br>
 Dict. Keys are repositories from the organization. Values are either "This repository has no jobs.", or 
 another dict.
 Second Level:<br>
-Dict. Keys are jobs with values another object, or status with value string which can be compilant or non-compilant. <br>
+Dict. Keys are "jobs" with values another object, or "status" with value string which can be compilant or non-compilant. <br>
 Thid Level: <br>
-Dict. Keys are job names and values are missing steps. If values are an empty list then the job will appear as compilant,
+Dict. Keys are job names (e.g. "build-and-test") and values are a list of missing steps (e.g. "hi"). If values are an empty list then the job will appear as compilant,
 and if the values are no empty, then the status of the repository is non-compilant.<br>
 There is plenty of space to make better the results more readible like in a csv, a table, etc. But without
-the exact description of its usecases I left it out in a minimalistic way.
+the exact description of its use cases I left it out in a minimalistic way.
 
 ## Design of the project
 ![alt text](https://github.com/nachogon1/organization-repositories-checker/blob/master/documents/organization_checker_diagram.png?raw=true)
@@ -80,11 +81,11 @@ the exact description of its usecases I left it out in a minimalistic way.
 ## Line of thought
 Overall code:
 
-    1. I decided to do a python scheduler instead of a github action or job since I would have to create runners and It would make the project much instructions much harder.
+    1. I decided to do a python scheduler instead of a github action or job since I would have to create runners and It would make the project instructions much harder.
 
-    2. The output of the organization repository checker is in JSON format, as it was not clearly defined how the output should look like. If a csv, or any specific format were desired, I can change it later.
+    2. The output of the organization repository checker is in JSON format, as it was not clearly defined how the output should look like. If a csv, or any specific format were desired, It can be changed later.
 
-    3. The code for the organization checker is a bit dirty. I should wrap it up better and make a better error handling. This part of the code might even break with strange config yamls.
+    3. The code for the checkup_steps in script/tools.py is a bit dirty. I should wrap it up better and make a better error handling. This part of the code might even break with strange config yamls.
 
 
 Database:
@@ -104,11 +105,11 @@ API:
 
     3. In PUT methods I would add etag checkups to avoid strange user experiences.
 
-    4. The organization_check API uses our db crud to access the database to make easier the tests. However, it should call the Steps API to make it more scalable, in this way it could be deployed as an independent microservice. (For that the tests would increase in difficulty as I would have to mock it with a a fake server as it happens with the Gitcalls).
+    4. The organization_check service uses our db endpoint to access the database to make easier the tests. However, it should call the Steps API with an http request to make it more scalable, in this way the organization_check service could be deployed as an independent microservice. (For that case, the tests would increase in difficulty, as I would have to mock it with a a fake server as it happens with the Gitcalls in the integration test).
 
 Build
 
-    1. I am not a “make” expert. I did what I could in the shortest period of time. Sorry.
+    1. I am not a “make” expert. I did what I could in the shortest period of time.
        
     2. For building in test or live systems. I would use some shell script in the pipeline where I would create the different envs. So far, I called develop.env to the environment of the project.
 
@@ -120,10 +121,10 @@ Testing
 
 Security
 
-    1. Ideally should all the APIs be guarded with some kind of credentials system. Eihter some token, or some login system.
+    1. Ideally all the APIs should be guarded with some kind of credentials system. Eihter some token, or some login system.
 
-    2. Sensitive credentials for production or test systems must come from secured vaults (Vault, Git CI/CD, etc) and be integrated at some point in the pipeline, but the deployment is out of the scope of this proje	ct. However, It would be technically easy to override the current system variables.
+    2. Sensitive credentials for production or test systems must come from secured vaults (Vault, Git CI/CD, etc) and be integrated at some point in the pipeline, but the deployment is out of the scope of this project. However, It would be technically easy to override the current system variables.
        
-## Contributors
+## Developers
 Ignacio Gonzalez Betegon
 
