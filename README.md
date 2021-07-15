@@ -61,7 +61,7 @@ Get the Organizazion check:<br>
 `curl -X GET http://127.0.0.1:8000/service/steps/organization-check?organization-name=<YOUR_ORGANIZATION_NAME>&github-token=<YOUR_ORGANIZATION_TOKEN> -H 'accept: application/json'`<br>
 Output:<br>
 `{"test-repo-1":["This repository has no jobs."],"test-repo-2":{"jobs":{"build-and-test":["hi","<WRITE_YOUR_STEP_HERE>","<WRITE_YOUR_STEP_HERE>"]},"status":"not-compliant"}}` <br>
-This last example is an example from my own organization. The output is a JSON that reads:
+This last example is an example from my own organization. The output is a JSON that reads:<br>
 First level:<br>
 Dict. Keys are repositories from the organization. Values are either "This repository has no jobs.", or 
 another dict.
