@@ -104,12 +104,14 @@ API:
 
     3. In PUT methods I would add etag checkups to avoid strange user experiences.
 
-    4. The organization_check API uses our db crud to access the database to make easier the tests. However, it should call the Steps API to make it more scalable, since it could be deployed as an independent microservice. (For that the tests would increase in difficulty as I would have to mock it with a a fake server as it happens with the Gitcalls).
+    4. The organization_check API uses our db crud to access the database to make easier the tests. However, it should call the Steps API to make it more scalable, in this way it could be deployed as an independent microservice. (For that the tests would increase in difficulty as I would have to mock it with a a fake server as it happens with the Gitcalls).
 
 Build
+
     1. I am not a “make” expert. I did what I could in the shortest period of time. Sorry.
        
     2. For building in test or live systems. I would use some shell script in the pipeline where I would create the different envs. So far, I called develop.env to the environment of the project.
+
     3. When deploying the application to test or live systems, the command uvicorn to start the app should be change for gunicorn.
 
 Testing
