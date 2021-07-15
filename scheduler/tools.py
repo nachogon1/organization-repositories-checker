@@ -89,7 +89,6 @@ async def check_steps(organization_name, token, steps=[]):
                     )
                     github.checkup_dict[repo_name["name"]]["status"] = "compliant"
                     for job in github.checkup_dict[repo_name["name"]]["jobs"]:
-                        print(github.checkup_dict[repo_name["name"]]["jobs"][job] == [])
                         if github.checkup_dict[repo_name["name"]]["jobs"][job]:
                             github.checkup_dict[repo_name["name"]]["status"] = "not-compliant"
                 else:
