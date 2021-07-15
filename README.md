@@ -125,6 +125,10 @@ Security
 
     2. Sensitive credentials for production or test systems must come from secured vaults (Vault, Git CI/CD, etc) and be integrated at some point in the pipeline, but the deployment is out of the scope of this project. However, It would be technically easy to override the current system variables.
        
+Code quality
+
+    1. For code quality tried to follow the PEP-8 python style. For linting processes I used black, isort and flake8.
+
 ## Developers
 Ignacio Gonzalez Betegon
 
