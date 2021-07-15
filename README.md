@@ -78,7 +78,50 @@ the exact description of its usecases I left it out in a minimalistic way.
 
 
 ## Line of thought
+Overall code:
 
+    1. I decided to do a python scheduler instead of a github action or job since I would have to create runners and It would make the project much instructions much harder.
+
+    2. The output of the organization repository checker is in JSON format, as it was not clearly defined how the output should look like. If a csv, or any specific format were desired, I can change it later.
+
+    3. The code for the organization checker is a bit dirty. I should wrap it up better and make a better error handling. This part of the code might even break with strange config yamls.
+
+
+Database:
+
+    1. I chose mongo as a DB, as it provides me more flexibility with the models.
+
+    2. I won’t add password	or usernames to the mongodb since it is only for testing purposes. For deploy stage I would deploy the database independently and I would configure the app throw a cloud build config file.
+       
+    3. In this example I will use pymongo to interact with the DB, in order to make the testing easier and reduce the amount of code. But for production I would use Async Motor.
+
+
+API:
+
+    1. For the apis I chose FastAPI, as it is a very fast modern framework. It has a very good documentation and It helps a lot documenting the api, as it serve them in swagger automaticallly.
+       
+    2. For validating the data from the api I will use pydantic and typing. They are my favourite since they support class dot notation.
+
+    3. In PUT methods I would add etag checkups to avoid strange user experiences.
+
+    4. The organization_check API uses our db crud to access the database to make easier the tests. However, it should call the Steps API to make it more scalable, since it could be deployed as an independent microservice. (For that the tests would increase in difficulty as I would have to mock it with a a fake server as it happens with the Gitcalls).
+
+Build
+    1. I am not a “make” expert. I did what I could in the shortest period of time. Sorry.
+       
+    2. For building in test or live systems. I would use some shell script in the pipeline where I would create the different envs. So far, I called develop.env to the environment of the project.
+    3. When deploying the application to test or live systems, the command uvicorn to start the app should be change for gunicorn.
+
+Testing
+
+    1. I have only made integration tests for the REST API and the checker service. But It would be good to add unit tests for the functions in tools.py.
+
+Security
+
+    1. Ideally should all the APIs be guarded with some kind of credentials system. Eihter some token, or some login system.
+
+    2. Sensitive credentials for production or test systems must come from secured vaults (Vault, Git CI/CD, etc) and be integrated at some point in the pipeline, but the deployment is out of the scope of this proje	ct. However, It would be technically easy to override the current system variables.
+       
 ## Contributors
 Ignacio Gonzalez Betegon
 
