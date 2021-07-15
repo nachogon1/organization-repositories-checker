@@ -1,8 +1,6 @@
 def test_steps_lifecycle(test_client):
 
-    mock_step = {
-        "command": "foobar"
-    }
+    mock_step = {"command": "foobar"}
 
     # Create step.
     response = test_client.post("/api/steps", json=mock_step)
@@ -17,7 +15,7 @@ def test_steps_lifecycle(test_client):
     assert result["command"] == "foobar"
 
     # Get all steps.
-    response = test_client.get(f"/api/steps")
+    response = test_client.get("/api/steps")
     assert response.status_code == 200
     results = response.json()
     assert len(results) == 1
@@ -25,7 +23,9 @@ def test_steps_lifecycle(test_client):
     new_step = result.copy()
     new_step["command"] = "test_edit"
     # Edit the step.
-    response = test_client.put(f"/api/steps?step-id={result['_id']}", json=new_step)
+    response = test_client.put(
+        f"/api/steps?step-id={result['_id']}", json=new_step
+    )
     assert response.status_code == 200
     assert response.json()["command"] == "test_edit"
 
@@ -42,7 +42,7 @@ def test_steps_lifecycle(test_client):
     assert result["command"] == "test_edit"
 
     # Check that the steps were deleted.
-    response = test_client.get(f"/api/steps")
+    response = test_client.get("/api/steps")
     assert response.status_code == 200
     results = response.json()
     assert len(results) == 0

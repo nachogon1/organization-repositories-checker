@@ -1,9 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body, Depends, Query
 
 from db.steps import StepCRUD
-from fastapi import Depends, Query, Body
-
-from model.step import StepModel, Step
+from model.step import StepModel
 
 steps_router = APIRouter()
 
@@ -26,12 +24,16 @@ def create_step(step: StepModel, step_crud: StepCRUD = Depends()):
 @steps_router.delete("/{step_id}")
 def delete_step(step_id: str, step_crud: StepCRUD = Depends()):
 
-    deleted_element =  step_crud.delete(step_id)
+    deleted_element = step_crud.delete(step_id)
     if not deleted_element:
         return "This document has already been removed."
     return deleted_element.dict(by_alias=True)
 
 
 @steps_router.put("")
-def edit_step(step_id: str = Query(..., alias="step-id"), step: StepModel = Body(...), step_crud: StepCRUD = Depends()):
+def edit_step(
+    step_id: str = Query(..., alias="step-id"),
+    step: StepModel = Body(...),
+    step_crud: StepCRUD = Depends(),
+):
     return step_crud.update(step_id, step).dict(by_alias=True)

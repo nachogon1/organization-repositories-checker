@@ -12,3 +12,4 @@ requests
 pytest
 pytest-httpserver
 isort
+flake8

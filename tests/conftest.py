@@ -1,14 +1,13 @@
+import socket
+
 from pytest import fixture
 from starlette.config import environ
 from starlette.testclient import TestClient
-import socket
-
 
 # Get a free port for our fake server.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', 0))
+s.bind(("", 0))
 _, port = s.getsockname()
-print("PORT", port)
 s.close()
 
 
@@ -16,11 +15,14 @@ s.close()
 def httpserver_listen_address():
     return ("localhost", port)
 
+
 # Set testing variables.
-environ['TESTING'] = 'TRUE'
+environ["TESTING"] = "TRUE"
 environ["DB_NAME"] = "yara-test-db"
 environ["GITHUB_URL"] = f"http://localhost:{port}"
 
+# Modules should be on top.
+# But environ must be before configs.
 from configs import DB_NAME
 from db.mongodb import get_database
 
@@ -43,7 +45,7 @@ def test_client():
 @fixture
 async def db_client():
     from app.core.config import MONGO_DB
-    from app.db.mongodb import get_database, connect_database
+    from app.db.mongodb import connect_database, get_database
 
     await connect_database()
 
@@ -51,6 +53,3 @@ async def db_client():
     yield db
     # Teardown
     db.client.drop_database(MONGO_DB)
-
-
-

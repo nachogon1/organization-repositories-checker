@@ -1,31 +1,24 @@
-import json
-import yaml
-
 import aiohttp
-import asyncio
-from configs import GITHUB_URL
-from starlette.requests import Request
-from starlette.responses import Response
-
+import yaml
 from fastapi import HTTPException
-
 from loguru import logger
 
-
+from configs import GITHUB_URL
 
 
 def create_report(checkup_dict):
     """Reports the missing steps from each repository."""
     for repository in checkup_dict:
         if checkup_dict[repository]:
-            logger.info(f"{repository} is missing {checkup_dict[repository]} steps.")
+            logger.info(
+                f"{repository} is missing {checkup_dict[repository]} steps."
+            )
         else:
             logger.info(f"{repository} has no steps.")
 
 
 def check_job_steps(job_steps_dict, list_required_steps):
     """Check the steps from a job and return the missing ones."""
-    print(list_required_steps)
     if job_steps_dict:
         check_up_dict = dict([(job, []) for job in job_steps_dict])
         for job in job_steps_dict:
@@ -40,7 +33,6 @@ def get_job_steps_dict(yml_file):
     job_steps_dict = {}
     if "jobs" in yml_file:
         for job in yml_file["jobs"]:
-            print(job_steps_dict, job)
             if "steps" in yml_file["jobs"][job]:
                 job_steps_dict[job] = yml_file["jobs"][job]["steps"]
             else:
@@ -66,21 +58,21 @@ def parse_yml(yml):
 
 
 async def check_steps(organization_name, token, steps=[]):
-    github = Github(
-        organization_name, token=token
-    )
+    github = Github(organization_name, token=token)
     async with github.session as session:
         async with session.get(
-                f"{GITHUB_URL}/orgs/{github.organization_name}/repos"
+            f"{GITHUB_URL}/orgs/{github.organization_name}/repos"
         ) as resp:
             texts = await resp.json()
             if resp.status != 200:
                 raise HTTPException(
-                    status_code=resp.status, detail=f"{resp.status} trying to log to git."
+                    status_code=resp.status,
+                    detail=f"{resp.status} trying to log to git.",
                 )  # This is a terrible error handling.
         for text in texts:
             async with session.get(
-                f'{GITHUB_URL}/{github.organization_name}/{text["name"]}/contents/.circleci/config.yml'
+                f'{GITHUB_URL}/repos/{github.organization_name}/{text["name"]}'
+                f'/contents/.circleci/config.yml'
             ) as resp:
                 repo_download_url = (await resp.json())["download_url"]
             async with session.get(repo_download_url) as resp:
@@ -94,6 +86,6 @@ async def check_steps(organization_name, token, steps=[]):
                     )
                 else:
                     github.checkup_dict[text["name"]] = "Has no steps."
-        logger.info("Repository missing steps", github.checkup_dict)
+        # Print works better for CLI scripts.
+        print("Repository missing steps", github.checkup_dict)
         return github.checkup_dict
-

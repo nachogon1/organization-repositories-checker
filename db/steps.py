@@ -1,18 +1,21 @@
-from db.mongodb import get_database
 from bson.objectid import ObjectId
 
+from db.mongodb import get_database
 from model.step import Step
 
 
 class StepCRUD:
-
     def __init__(self):
         self.collection = "step"
         self.db = get_database()
 
     def insert(self, steps):
         result = {}
-        document_id = str(self.db[self.collection].insert_one(steps.dict(by_alias=True)).inserted_id)
+        document_id = str(
+            self.db[self.collection]
+            .insert_one(steps.dict(by_alias=True))
+            .inserted_id
+        )
         result["_id"] = document_id
         result.update(steps)
         return Step(**result)
@@ -33,8 +36,9 @@ class StepCRUD:
             return Step(**document)
 
     def update(self, _id, step):
-        self.db[self.collection].update_one({"_id": ObjectId(_id)}, {"$set": step.dict(by_alias=True)})
+        self.db[self.collection].update_one(
+            {"_id": ObjectId(_id)}, {"$set": step.dict(by_alias=True)}
+        )
         document = self.db[self.collection].find_one({"_id": ObjectId(_id)})
         if document:
             return Step(**document)
-

@@ -1,4 +1,3 @@
-from bson import ObjectId
 from pydantic import BaseModel, Field, validator
 
 
@@ -11,5 +10,4 @@ class Step(StepModel):
 
     @validator("id", pre=True, always=True)
     def transform_id(cls, v, values):
-        print("values", v)
         return str(v)

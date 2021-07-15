@@ -1,27 +1,28 @@
-import os
+import asyncio
 import sys
 from pathlib import Path
+
 import requests
 
+# This is a bit dirty. But I need it to make imports from a script.
 file = Path(__file__).resolve()
 parent, top = file.parent, file.parents[1]
 sys.path.append(str(top))
-print(parent)
-from model.step import Step
 
-print(os.getcwd(), __name__)
-
-from configs import *
-from scheduler.tools import *
 import aioschedule as schedule
-from datetime import datetime
-# TODO requests get steps and add the to scheduler
+
+from configs import APP_URL, GITHUB_ORGANIZATION, GITHUB_TOKEN
+from model.step import Step
+from scheduler.tools import check_steps
 
 response = requests.get(f"{APP_URL}/api/steps")
 steps = [Step(**step) for step in response.json()]
-print(steps)
-print(datetime.now())
-schedule.every().day.at("10:00").do(check_steps, organization_name=GITHUB_ORGANIZATION, token=GITHUB_TOKEN, steps=steps)
+schedule.every().day.at("00:04").do(
+    check_steps,
+    organization_name=GITHUB_ORGANIZATION,
+    token=GITHUB_TOKEN,
+    steps=steps,
+)
 
 loop = asyncio.get_event_loop()
 while True:
