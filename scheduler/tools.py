@@ -19,12 +19,11 @@ def create_report(checkup_dict):
 
 def check_job_steps(job_steps_dict, list_required_steps):
     """Check the steps from a job and return the missing ones."""
-    if job_steps_dict:
-        check_up_dict = dict([(job, []) for job in job_steps_dict])
-        for job in job_steps_dict:
-            for step in list_required_steps:
-                if step not in job_steps_dict[job]:
-                    check_up_dict[job] += [step]
+    check_up_dict = dict([(job, []) for job in job_steps_dict])
+    for job in job_steps_dict:
+        for step in list_required_steps:
+            if step not in job_steps_dict[job]:
+                check_up_dict[job] += [step]
     return check_up_dict
 
 
@@ -72,7 +71,7 @@ async def check_steps(organization_name, token, steps=[]):
         for text in texts:
             async with session.get(
                 f'{GITHUB_URL}/repos/{github.organization_name}/{text["name"]}'
-                f'/contents/.circleci/config.yml'
+                f"/contents/.circleci/config.yml"
             ) as resp:
                 repo_download_url = (await resp.json())["download_url"]
             async with session.get(repo_download_url) as resp:
@@ -81,11 +80,17 @@ async def check_steps(organization_name, token, steps=[]):
                 steps_parsed = [parse_yml(step.command) for step in steps]
                 job_steps_dict = get_job_steps_dict(yml_parsed)
                 if job_steps_dict:
-                    github.checkup_dict[text["name"]] = check_job_steps(
+                    github.checkup_dict[text["name"]] = {"jobs": {}}
+                    github.checkup_dict[text["name"]]["jobs"] = check_job_steps(
                         job_steps_dict, steps_parsed
                     )
+                    github.checkup_dict[text["name"]]["status"] = "compliant"
+                    for job in github.checkup_dict[text["name"]]["jobs"]:
+                        print(github.checkup_dict[text["name"]]["jobs"][job] == [])
+                        if github.checkup_dict[text["name"]]["jobs"][job]:
+                            github.checkup_dict[text["name"]]["status"] = "not-compliant"
                 else:
-                    github.checkup_dict[text["name"]] = "Has no steps."
+                    github.checkup_dict[text["name"]] = "This repository has no jobs."
         # Print works better for CLI scripts.
         print("Repository missing steps", github.checkup_dict)
         return github.checkup_dict

@@ -58,6 +58,6 @@ def test_organization_check(test_client, httpserver):
     )
     assert response.status_code == 200
     assert response.json() == {
-        "fake_repo_1": {"fake_config_1_job_1": ["foobar", "yara_step"]},
-        "fake_repo_2": {"fake_config_2_job_2": ["foobar", "yara_step"]},
+        'fake_repo_1': {'jobs': {'fake_config_1_job_1': ['foobar', 'yara_step']}, 'status': 'not-compliant'},
+        'fake_repo_2': {'jobs': {'fake_config_2_job_2': ['foobar', 'yara_step']}, 'status': 'not-compliant'},
     }

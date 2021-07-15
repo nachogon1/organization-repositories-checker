@@ -15,5 +15,7 @@ async def check_organization_steps(
     github_token: str = Query(default=GITHUB_TOKEN, alias="github-token"),
     step_crud: StepCRUD = Depends(),
 ):
-    steps = step_crud.get_all()  # TODO this should be called via API.
+    # Change to API request if this service is deployed as microservice.
+    # This is easier for testing reasons.
+    steps = step_crud.get_all()
     return await check_steps(organization_name, github_token, steps)

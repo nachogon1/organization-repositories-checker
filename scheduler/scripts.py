@@ -17,7 +17,7 @@ from scheduler.tools import check_steps
 
 response = requests.get(f"{APP_URL}/api/steps")
 steps = [Step(**step) for step in response.json()]
-schedule.every().day.at("00:04").do(
+schedule.every().day.at("09:00").do(
     check_steps,
     organization_name=GITHUB_ORGANIZATION,
     token=GITHUB_TOKEN,
