@@ -74,7 +74,7 @@ There is plenty of space to make better the results more readible like in a csv,
 the exact description of its usecases I left it out in a minimalistic way.
 
 ## Design of the project
-
+![alt text](https://github.com/nachogon1/organization-repositories-checker/blob/master/documents/organization_checker_diagram.png?raw=true)
 
 
 ## Line of thought
