@@ -57,20 +57,23 @@ def parse_yml(yml):
 
 
 async def check_steps(organization_name, token, steps=[]):
+    """Get all repo names from an organization. Get their download urls,
+    and get the config.yml files. Parse it, look for the steps and
+    collect them."""
     github = Github(organization_name, token=token)
     async with github.session as session:
         async with session.get(
             f"{GITHUB_URL}/orgs/{github.organization_name}/repos"
         ) as resp:
-            texts = await resp.json()
+            repo_names = await resp.json()
             if resp.status != 200:
                 raise HTTPException(
                     status_code=resp.status,
                     detail=f"{resp.status} trying to log to git.",
                 )  # This is a terrible error handling.
-        for text in texts:
+        for repo_name in repo_names:
             async with session.get(
-                f'{GITHUB_URL}/repos/{github.organization_name}/{text["name"]}'
+                f'{GITHUB_URL}/repos/{github.organization_name}/{repo_name["name"]}'
                 f"/contents/.circleci/config.yml"
             ) as resp:
                 repo_download_url = (await resp.json())["download_url"]
@@ -80,17 +83,17 @@ async def check_steps(organization_name, token, steps=[]):
                 steps_parsed = [parse_yml(step.command) for step in steps]
                 job_steps_dict = get_job_steps_dict(yml_parsed)
                 if job_steps_dict:
-                    github.checkup_dict[text["name"]] = {"jobs": {}}
-                    github.checkup_dict[text["name"]]["jobs"] = check_job_steps(
+                    github.checkup_dict[repo_name["name"]] = {"jobs": {}}
+                    github.checkup_dict[repo_name["name"]]["jobs"] = check_job_steps(
                         job_steps_dict, steps_parsed
                     )
-                    github.checkup_dict[text["name"]]["status"] = "compliant"
-                    for job in github.checkup_dict[text["name"]]["jobs"]:
-                        print(github.checkup_dict[text["name"]]["jobs"][job] == [])
-                        if github.checkup_dict[text["name"]]["jobs"][job]:
-                            github.checkup_dict[text["name"]]["status"] = "not-compliant"
+                    github.checkup_dict[repo_name["name"]]["status"] = "compliant"
+                    for job in github.checkup_dict[repo_name["name"]]["jobs"]:
+                        print(github.checkup_dict[repo_name["name"]]["jobs"][job] == [])
+                        if github.checkup_dict[repo_name["name"]]["jobs"][job]:
+                            github.checkup_dict[repo_name["name"]]["status"] = "not-compliant"
                 else:
-                    github.checkup_dict[text["name"]] = "This repository has no jobs."
+                    github.checkup_dict[repo_name["name"]] = "This repository has no jobs."
         # Print works better for CLI scripts.
         print("Repository missing steps", github.checkup_dict)
         return github.checkup_dict
