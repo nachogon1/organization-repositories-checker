@@ -45,8 +45,56 @@ class Github:
         self.organization_name = organization_name
         self.token = f"token {token}"
         self.headers = {"Authorization": self.token}
-        self.session = aiohttp.ClientSession(headers=self.headers)
+        self.session = aiohttp.ClientSession
         self.checkup_dict = {}
+
+    @staticmethod
+    def validate_response(resp):
+        if resp.status != 200:
+            raise HTTPException(
+                status_code=resp.status,
+                detail=f"{resp.status} trying to log to git.",
+            )  # This is a terrible error handling.
+
+    async def get_repositories(self):
+        async with self.session(headers=self.headers) as session:
+            async with session.get(
+                    f"{GITHUB_URL}/orgs/{self.organization_name}/repos"
+            ) as resp:
+                self.validate_response(resp)
+                repo_names = await resp.json()
+
+        return repo_names
+
+    async def get_repo_yml_url(self, repo):
+        async with self.session(headers=self.headers).get(
+                f'{GITHUB_URL}/repos/{self.organization_name}/{repo["name"]}'
+                f"/contents/.circleci/config.yml"
+        ) as resp:
+            self.validate_response(resp)
+            repo_download_url = (await resp.json())["download_url"]
+        return repo_download_url
+
+    async def get_config_yml(self, url):
+        async with self.session(headers=self.headers).get(url) as resp:
+            self.validate_response(resp)
+            config_yml = await resp.text()
+        return config_yml
+
+    def analyze_repository(self, config_yml, steps, repo_name):
+        yml_parsed = parse_yml(config_yml)
+        job_steps_dict = get_job_steps_dict(yml_parsed)
+        if job_steps_dict:
+            self.checkup_dict[repo_name["name"]] = {"jobs": {}}
+            self.checkup_dict[repo_name["name"]]["jobs"] = check_job_steps(
+                job_steps_dict, steps
+            )
+            self.checkup_dict[repo_name["name"]]["status"] = "compliant"
+            for job in self.checkup_dict[repo_name["name"]]["jobs"]:
+                if self.checkup_dict[repo_name["name"]]["jobs"][job]:
+                    self.checkup_dict[repo_name["name"]]["status"] = "not-compliant"
+        else:
+            self.checkup_dict[repo_name["name"]] = "This repository has no jobs."
 
 
 def parse_yml(yml):
@@ -61,38 +109,14 @@ async def check_steps(organization_name, token, steps=[]):
     and get the config.yml files. Parse it, look for the steps and
     collect them."""
     github = Github(organization_name, token=token)
-    async with github.session as session:
-        async with session.get(
-            f"{GITHUB_URL}/orgs/{github.organization_name}/repos"
-        ) as resp:
-            repo_names = await resp.json()
-            if resp.status != 200:
-                raise HTTPException(
-                    status_code=resp.status,
-                    detail=f"{resp.status} trying to log to git.",
-                )  # This is a terrible error handling.
-        for repo_name in repo_names:
-            async with session.get(
-                f'{GITHUB_URL}/repos/{github.organization_name}/{repo_name["name"]}'
-                f"/contents/.circleci/config.yml"
-            ) as resp:
-                repo_download_url = (await resp.json())["download_url"]
-            async with session.get(repo_download_url) as resp:
-                config_yml = await resp.text()
-                yml_parsed = parse_yml(config_yml)
-                steps_parsed = [parse_yml(step.command) for step in steps]
-                job_steps_dict = get_job_steps_dict(yml_parsed)
-                if job_steps_dict:
-                    github.checkup_dict[repo_name["name"]] = {"jobs": {}}
-                    github.checkup_dict[repo_name["name"]]["jobs"] = check_job_steps(
-                        job_steps_dict, steps_parsed
-                    )
-                    github.checkup_dict[repo_name["name"]]["status"] = "compliant"
-                    for job in github.checkup_dict[repo_name["name"]]["jobs"]:
-                        if github.checkup_dict[repo_name["name"]]["jobs"][job]:
-                            github.checkup_dict[repo_name["name"]]["status"] = "not-compliant"
-                else:
-                    github.checkup_dict[repo_name["name"]] = "This repository has no jobs."
-        # Print works better for CLI scripts.
-        print("Repository missing steps", github.checkup_dict)
-        return github.checkup_dict
+
+    repo_names = await github.get_repositories()
+    for repo_name in repo_names:
+        repo_download_url = await github.get_repo_yml_url(repo_name)
+        config_yml = await github.get_config_yml(repo_download_url)
+        steps_names = [step.command for step in steps]
+        github.analyze_repository(config_yml, steps_names, repo_name)
+
+    # Print works better for CLI scripts.
+    print("Repository missing steps", github.checkup_dict)
+    return github.checkup_dict
